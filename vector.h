@@ -5,8 +5,7 @@
 #ifndef LIGHTNN_VECTOR_H
 #define LIGHTNN_VECTOR_H
 
-
-class vector<T> {
+template <typename T> class vector {
 
 private:
     T *values = nullptr;
@@ -16,9 +15,12 @@ private:
     void enlarge();
 
 public:
-    vector();
+    vector<T>();
+    vector<T>(unsigned int size);
+    vector<T>(const vector& vector);
+
     ~vector();
-    T at(unsigned int position);
+    T& at(unsigned int position);
     T back();
     T front();
     T pop_back();
@@ -30,6 +32,7 @@ public:
     int set(T value, unsigned int position);
     int insert(T value, unsigned int position);
 
+    T& operator[](unsigned int position);
 };
 
 
