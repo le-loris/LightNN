@@ -6,7 +6,7 @@
 #define LIGHTNN_VECTOR_H
 
 
-class vector<T> {
+template <typename T>class vector {
 
 private:
     T *values = nullptr;
@@ -17,8 +17,10 @@ private:
 
 public:
     vector();
+    vector(unsigned int size, T* values = nullptr);
+    vector(vector& vec);
     ~vector();
-    T at(unsigned int position);
+    T& at(unsigned int position);
     T back();
     T front();
     T pop_back();
@@ -27,7 +29,6 @@ public:
     unsigned int size();
     void push_back(T value);
     void push_front(T value);
-    int set(T value, unsigned int position);
     int insert(T value, unsigned int position);
 
 };
