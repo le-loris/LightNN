@@ -51,6 +51,7 @@ public:
 	Matrix<T>& operator-(const Matrix<T>& other);
 	Matrix<T>& operator*(const Matrix<T>& other);
 	Matrix<T>& operator*(const T& scale);
+	T& operator[](unsigned int column);
 };
 
 template<typename T> vector<T>& operator*(const Matrix<T>& M, const vector<T>& V);

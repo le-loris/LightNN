@@ -6,6 +6,7 @@
 #define LIGHTNN_VECTOR_H
 #include<stdexcept>
 
+template <typename T> class vector {
 
 template <typename T>class vector {
 

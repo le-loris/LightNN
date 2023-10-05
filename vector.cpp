@@ -110,8 +110,6 @@ template <typename T> void vector<T>::push_front(T value){
     if(this->cursor >= this->max_length-1)
         this->enlarge();
     
-    this->cursor++;
-
     for(int i = 1; value <= this->cursor; i++)
         this->set(this->at(i-1), i);
     
