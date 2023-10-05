@@ -4,29 +4,6 @@
 
 #include "Matrix.h"
 
-template<typename T> bool Matrix<T>::isEmpty(){
-	if (cursor.size() != 2)
-		return true;
-
-	if(cursor.at(0) == 0 || cursor.at(1) == 0)
-		return true;
-
-	return false;
-}
-
-template<typename T>void Matrix<T>::enlarge(bool horizontally, bool vertically){
-	if(vertically)
-		this->dimensions.at(0) += 10;
-	if(horizontally)
-		this->dimensions.at(1) += 10;
-
-	T *temp = new T[this->dimensions.at(0) * this->dimensions.at(1)];
-	for (int i = 0; i < this->dimensions.at(0) * this->dimensions.at(1); i++)
-		temp[i] = this->values[i];
-	delete[] this->values;
-	this->values = temp;
-}
-
 template<typename T> Matrix<T>::Matrix(){
 	this->dimensions = vector<unsigned int>(2);
 	this->dimensions.push_back(10);
@@ -65,6 +42,36 @@ template<typename T> Matrix<T>::Matrix(const Matrix& other) {
 		this->values[i] = other.values[i];
 }
 
+template<typename T> Matrix<T>::Matrix<T>(const Matrix&& other){
+	this->dimensions = this->cursor = other.size();
+	this->values = new T[this->dimensions.at(0) * this->dimensions.at(1)];
+	for (int i = 0; i < this->dimensions.at(0) * this->dimensions.at(1); i++)
+		this->values[i] = other.values[i];
+}
+
+template<typename T> bool Matrix<T>::isEmpty(){
+	if (cursor.size() != 2)
+		return true;
+
+	if(cursor.at(0) == 0 || cursor.at(1) == 0)
+		return true;
+
+	return false;
+}
+
+template<typename T>void Matrix<T>::enlarge(bool horizontally, bool vertically){
+	if(vertically)
+		this->dimensions.at(0) += 10;
+	if(horizontally)
+		this->dimensions.at(1) += 10;
+
+	T *temp = new T[this->dimensions.at(0) * this->dimensions.at(1)];
+	for (int i = 0; i < this->dimensions.at(0) * this->dimensions.at(1); i++)
+		temp[i] = this->values[i];
+	delete[] this->values;
+	this->values = temp;
+}
+
 template<typename T> Matrix<T> Matrix<T>::identity(unsigned int size){
 	Matrix<T> temp(size, size, new T[size * size]);
 	for (int i = 0; i < size; i++)
@@ -90,6 +97,13 @@ template<typename T> Matrix<T> Matrix<T>::transpose() {
 			temp.set(this->at(i, j), j, i);
 	return temp;
 
+}
+
+template<typename T>void Matrix<T>::clear(){
+	for (unsigned int i = 0; i < this->dimensions.at(0) * this->dimensions.at(1); i++)
+		this->values[i] = T();
+
+	this->cursor = vector<unsigned int>(2);
 }
 
 template<typename T> Matrix<T>::~Matrix(){
@@ -167,7 +181,7 @@ template<typename T> vector<T> Matrix<T>::getColumn(unsigned int column){
 	return temp;
 }
 
-template<typename T> Matrix<T> Matrix<T>::operator+(const Matrix<T>& other){
+template<typename T> Matrix<T>& Matrix<T>::operator+(const Matrix<T>& other){
 	if (this->dimensions != other.dimensions)
 		throw "Invalid dimensions size for Matrix addition";
 
@@ -177,7 +191,17 @@ template<typename T> Matrix<T> Matrix<T>::operator+(const Matrix<T>& other){
 	return temp;
 }
 
-template<typename T> Matrix<T> Matrix<T>::operator-(const Matrix<T>& other){
+template<typename T>Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& other)
+{
+	if (this->dimensions != other.dimensions)
+		throw "Invalid dimensions size for Matrix addition";
+
+	for (int i = 0; i < this->dimensions.at(0) * this->dimensions.at(1); i++)
+		this->values[i] += other.values[i];
+	return *this;
+}
+
+template<typename T> Matrix<T>& Matrix<T>::operator-(const Matrix<T>& other){
 	if (this->dimensions != other.dimensions)
 		throw "Invalid dimensions for Matrix substraction";
 
@@ -187,7 +211,7 @@ template<typename T> Matrix<T> Matrix<T>::operator-(const Matrix<T>& other){
 	return temp;
 }
 
-template<typename T> Matrix<T> Matrix<T>::operator*(const Matrix<T>& other){
+template<typename T> Matrix<T>& Matrix<T>::operator*(const Matrix<T>& other){
 	if (this->dimensions.at(1) != other.dimensions.at(0))
 		throw "Invalid dimensions for Matrix product";
 
@@ -199,14 +223,14 @@ template<typename T> Matrix<T> Matrix<T>::operator*(const Matrix<T>& other){
 	return temp;
 }
 
-template<typename T> Matrix<T> Matrix<T>::operator*(const T& scale){
+template<typename T> Matrix<T>& Matrix<T>::operator*(const T& scale){
 	Matrix<T> temp(this->dimensions, new T[this->dimensions.at(0) * this->dimensions.at(1)]);
 	for (int i = 0; i < this->dimensions.at(0) * this->dimensions.at(1); i++)
 		temp.values[i] = this->values[i] * scale;
 	return temp;
 }
 
-template<typename T> vector<T> operator*(const Matrix<T>& M, const vector<T>& V){
+template<typename T> vector<T>& operator*(const Matrix<T>& M, const vector<T>& V){
 	if (M->dimensions.at(0) != V.size())
 		throw "Invalid dimensions for Matrix product";
 
@@ -217,7 +241,7 @@ template<typename T> vector<T> operator*(const Matrix<T>& M, const vector<T>& V)
 	return temp;
 }
 
-template<typename T> vector<T> operator*(const vector<T>& V, const Matrix<T>& M) {
+template<typename T> vector<T>& operator*(const vector<T>& V, const Matrix<T>& M) {
 	if (M->dimensions.at(1) != V.size())
 		throw "Invalid dimensions for Matrix product";
 
@@ -225,5 +249,14 @@ template<typename T> vector<T> operator*(const vector<T>& V, const Matrix<T>& M)
 	for (int i = 0; i < M->dimensions.at(0); i++)
 		for (int j = 0; j < M->dimensions.at(1); j++)
 			temp.at(i) += M->at(i, j) * V.at(j);
+	return temp;
+}
+
+template<typename T> Matrix<T>& operator&(const vector<T>& V1, const vector<T>& V2){
+	Matrix<T> temp(V1.size(), V2.size(), new T[V1.size() * V2.size()]);
+	for (int i = 0; i < V1.size(); i++)
+		for (int j = 0; j < V2.size(); j++)
+			temp.at(i, j) = V1.at(i) * V2.at(j);
+
 	return temp;
 }

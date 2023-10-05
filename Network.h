@@ -6,11 +6,6 @@
 #define LIGHTNN_NETWORK_H
 #include "Matrix.h"
 
-typedef struct NET_STRUCT {
-    unsigned int nbLayers;
-    unsigned int* layers;
-} NetStruct;
-
 typedef struct T_DATA {
     vector<float> inp;
     vector<float> out;
@@ -21,23 +16,28 @@ typedef struct T_DATA {
 class Network {
 private:
 	vector<Matrix<float>> weights;
-	vector<float> biases;
-	Matrix<float> layers;
-    NetStruct structure;
+    vector<vector<float>> layers;
+    vector<unsigned int> structure;
     float learningRate;
-    TrainingData* trainingData;
+    vector<TrainingData> trainingData;
+
+    vector<float> error_historic;
 
 public:
     Network();
-    Network(NetStruct structure, float learningRate = 0.1);
+    Network(vector<unsigned int> structure, vector<TrainingData> trainingData, float learningRate = 0.1);
     ~Network();
 
+    
+    void initNetwork();
+    void initLayers();
+    void initBias();
+    void randomizeWeights();
+    vector<float> setTrainingData(TrainingData trainingData);
     vector<float> feedForward();
-    vector<float> backPropagation();
+    vector<vector<float>> backPropagation(vector<float> final_error);
+    void adjustWeights(vector<vector<float>> variation);
     void train();
-    void updateWeights();
-    void updateBiases();
-    void setTrainingData(TrainingData trainingData);
     
 };
 

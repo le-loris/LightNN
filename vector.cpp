@@ -14,7 +14,7 @@ template<typename T> vector<T>::vector(unsigned int size, T* values){
     this->max_length = this->cursor = size;
     if(values == nullptr){
         this->values = new T[this->max_length];
-        for (i = 0; i < this->max_length; i++)
+        for (unsigned int i = 0; i < this->max_length; i++)
             this->values[i] = T();
     }
     else
@@ -25,8 +25,16 @@ template<typename T> vector<T>::vector(vector& vec){
     this->max_length = this->cursor = vec.size();
 
     this->values = new T[this->max_length];
-    for(i = 0; i < this->max_length; i++)
+    for(unsigned int i = 0; i < this->max_length; i++)
 		this->values[i] = vec.at(i);
+}
+
+template<typename T> vector<T>::vector(vector&& vec){
+	this->max_length = this->cursor = vec.size();
+	
+   this->values = new T[this->max_length];
+   for (unsigned int i = 0; i < this->max_length; i++)
+       this->values[i] = vec.at(i);
 }
 
 template <typename T> vector<T>::~vector(){
@@ -52,11 +60,11 @@ template <typename T> T& vector<T>::at(unsigned int position){
     else return values[position];
 }
 
-template <typename T> T vector<T>::back(){
+template <typename T> T& vector<T>::back(){
     return this->at(cursor);
 }
 
-template <typename T> T vector<T>::front(){
+template <typename T> T& vector<T>::front(){
     return this->at(0);
 }
 
@@ -68,7 +76,7 @@ template <typename T> T vector<T>::pop_back(){
         float temp = this->back();
         values[cursor] = T();
         cursor--;
-        if(cursor == 0) isEmtpy = true;
+        if(cursor == 0) this->isEmpty = true;
         
         return temp;
     }
@@ -83,7 +91,7 @@ template <typename T> T vector<T>::pop_front(){
             values[i] = values[i+1];
         }
         cursor--;
-        if(cursor == 0) isEmtpy = true;
+        if(cursor == 0) this->isEmpty = true;
     }
 }
 
@@ -118,10 +126,116 @@ template <typename T> int vector<T>::insert(T value, unsigned  int position){
             enlarge();
 
         this->cursor++;
-        for (int i = position + 1; i <= this->cursor)
-            this->set(this->at(i - 1), i)
+        for (int i = position + 1; i <= this->cursor; i++)
+            this->at(i - 1) = i;
 
-        this->set(value, position);
+        this->at(position) = value;
         return position;
-    }
+   }
+}
+
+template<typename T> vector<T>& vector<T>::operator*(const vector<T>& vec){
+if(this->size() != vec.size())
+		throw std::invalid_argument("Vectors must have the same size for dot product");
+
+	vector<T> temp(this->size(), nullptr);
+	for(int i = 0; i < this->size(); i++)
+		temp.at(i) = this->at(i) * vec.at(i);
+
+	return temp;
+}
+
+template<typename T> T vector<T>::norm_sq(){
+    T norm = 0;
+    for(unsigned int i = 0; i < this->size(); i++)
+		norm += this->at(i) * this->at(i);
+
+	return norm;
+}
+
+template<typename T>void vector<T>::clear() {
+    for (unsigned int i = 0; i < this->max_length; i++)
+        this->values[i] = T();
+    this->cursor = 0;
+}
+
+template<typename T> vector<T>& vector<T>::operator+(const vector<T>& vec){
+	if(this->size() != vec.size())
+		throw std::invalid_argument("Vectors must have the same size for addition");
+
+	vector<T> temp(this->size(), nullptr);
+	for(int i = 0; i < this->size(); i++)
+		temp.at(i) = this->at(i) + vec.at(i);
+
+	return temp;
+}
+
+template<typename T> vector<T>& vector<T>::operator-(const vector<T>& vec){
+	if(this->size() != vec.size())
+		throw std::invalid_argument("Vectors must have the same size for subtraction");
+
+	vector<T> temp(this->size(), nullptr);
+	for(int i = 0; i < this->size(); i++)
+		temp.at(i) = this->at(i) - vec.at(i);
+
+	return temp;
+}
+
+template<typename T> vector<T>& vector<T>::operator*(const T& scalar){
+	vector<T> temp(this->size(), nullptr);
+	for(int i = 0; i < this->size(); i++)
+		temp.at(i) = this->at(i) * scalar;
+
+	return temp;
+}
+
+template<typename T> vector<T>& vector<T>::operator/(const T& scalar){
+	vector<T> temp(this->size(), nullptr);
+	for(int i = 0; i < this->size(); i++)
+		temp.at(i) = this->at(i) / scalar;
+
+	return temp;
+}
+
+template<typename T> vector<T>& vector<T>::operator=(const vector<T>& vec){
+	if(this != &vec){
+		delete[] this->values;
+		this->max_length = this->cursor = vec.size();
+		this->values = new T[this->max_length];
+		for(int i = 0; i < this->max_length; i++)
+			this->values[i] = vec.at(i);
+	}
+	return *this;
+}
+
+template<typename T> vector<T>& vector<T>::operator=(vector<T>&& vec){
+	if(this != &vec){
+		delete[] this->values;
+		this->max_length = this->cursor = vec.size();
+		this->values = new T[this->max_length];
+		for(int i = 0; i < this->max_length; i++)
+			this->values[i] = vec.at(i);
+	}
+	return *this;
+}
+
+template<typename T> T& vector<T>::operator[](unsigned int position){
+	return this->at(position);
+}
+
+template<typename T> bool vector<T>::operator==(const vector<T>& vec){
+    bool result = true;
+    if(this->size() != vec.size())
+		return false;
+	else{
+		for(int i = 0; i < this->size(); i++){
+            result &= (this->at(i) == vec.at(i));
+			if(!result) return false;
+		}
+	}
+    return true;
+}
+
+template<typename T> bool vector<T>::operator!=(const vector<T>& vec){
+	return !(*this == vec);
 }

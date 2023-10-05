@@ -5,6 +5,7 @@
 #ifndef LIGHTNN_MATRIX_H
 #define LIGHTNN_MATRIX_H
 #include "vector.h"
+#include "define.h"
 
 template <typename T>class Matrix {
 private:
@@ -19,11 +20,14 @@ public:
 	Matrix(vector<unsigned int> dimensions, T* values = nullptr);
 	Matrix(unsigned int rows, unsigned int columns, T* values = nullptr);
 	Matrix(const Matrix& other);
+	Matrix(const Matrix&& other);
 	static Matrix<T> identity(unsigned int size);
 	static Matrix<T> random(unsigned int rows, unsigned int columns, T max, T min = T());
 	static Matrix<T> fromVector(vector<T> values);
 	
 	Matrix<T> transpose();
+
+	void clear();
 
 	~Matrix();
 	
@@ -42,13 +46,17 @@ public:
 	vector<T> getRow(unsigned int row);
 	vector<T> getColumn(unsigned int column);
 
-	Matrix<T> operator+(const Matrix<T>& other);
-	Matrix<T> operator-(const Matrix<T>& other);
-	Matrix<T> operator*(const Matrix<T>& other);
-	Matrix<T> operator*(const T& scale);
+	Matrix<T>& operator+(const Matrix<T>& other);
+	Matrix<T>& operator+=(const Matrix<T>& other);
+	Matrix<T>& operator-(const Matrix<T>& other);
+	Matrix<T>& operator*(const Matrix<T>& other);
+	Matrix<T>& operator*(const T& scale);
 };
 
-template<typename T> vector<T> operator*(const Matrix<T>& M, const vector<T>& V);
-template<typename T> vector<T> operator*(const vector<T>& V, const Matrix<T>& M);
+template<typename T> vector<T>& operator*(const Matrix<T>& M, const vector<T>& V);
+template<typename T> vector<T>& operator*(const vector<T>& V, const Matrix<T>& M);
+
+template<typename T> Matrix<T>& operator&(const vector<T>& V1, const vector<T>& V2);
+
 
 #endif //LIGHTNN_MATRIX_H
